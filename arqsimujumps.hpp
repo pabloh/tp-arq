@@ -12,7 +12,7 @@ class Predictor {
     public:
         Predictor(string pdescription = "");
         virtual bool analyze(VOID *ip, VOID *target, bool taken) = 0;
-        virtual VOID output(std::ostream *outstream);
+        virtual void output(std::ostream *outstream);
 };
 
 
@@ -69,7 +69,7 @@ class TwoBitHysteresisHistoryPredictor : public HistoryPredictor {
 //Predictor methods
 Predictor::Predictor(string pdescription) : description(pdescription) {}
 
-VOID Predictor::output(std::ostream *outstream) {
+void Predictor::output(std::ostream *outstream) {
     *outstream << "=====" << std::endl;
     *outstream << description << std::endl;
     *outstream << "\thits/predictions: " <<

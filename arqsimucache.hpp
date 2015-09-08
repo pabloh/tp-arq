@@ -63,7 +63,6 @@ class Cache : public Memory {
         UINT64 index_len();
         UINT64 index_mask();
         UINT64 offset_len();
-        VOID* make_addr(UINT64 tag, UINT64 index);
         UINT64 get_index(VOID *addr);
         UINT64 get_tag(VOID *addr);
 
@@ -167,11 +166,6 @@ UINT64 Cache::offset_len() {
     return log2(line_len);
 }
 
-VOID* Cache::make_addr(UINT64 tag, UINT64 index) {
-    return (VOID *)(((tag << index_len()) | index) << offset_len());
-}
-
-
 UINT64 Cache::get_index(VOID *addr) {
     return ((UINT64)addr >> offset_len()) & index_mask();
 }
@@ -211,8 +205,7 @@ UINT64 Cache::read(VOID *addr) {
         if (sets[index].is_full()) {
             Line line = sets[index].unload_line();
             if (line.is_dirty()) {
-                total_overhead +=
-                    next->write(make_addr(line.get_tag(), index));
+                total_overhead += next->write(addr);
             }
         }
         
@@ -235,8 +228,7 @@ UINT64 Cache::write(VOID *addr) {
         if (sets[index].is_full()) {
             Line line = sets[index].unload_line();
             if (line.is_dirty()) {
-                total_overhead +=
-                    next->write(make_addr(line.get_tag(), index));
+                total_overhead += next->write(addr);
             }
         }
         

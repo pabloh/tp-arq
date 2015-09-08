@@ -72,7 +72,7 @@ class CPU {
         VOID process_instruction(INS ins) {
             instrs++;
 
-            // if it's a memory read,
+            // If the inst performs a memory read
             if (INS_IsMemoryRead(ins)) {
                 UINT32 memops = INS_MemoryOperandCount(ins);
 
@@ -91,23 +91,25 @@ class CPU {
                 for (UINT32 wreg = 0; wreg < wregs; wreg++)
                     recent_regs.push_back(INS_RegW(ins, wreg));
             }
-            // if it's a memory write,
+
+            // If the inst performs a memory write
             if (INS_IsMemoryWrite(ins)) {
                 // only use one cycle (but since it's a memory operation, it
                 // will have to wait for other memory operations to complete)
                 process_memop(1);
             }
-            else if (INS_IsBranchOrCall(ins) && INS_HasFallThrough(ins)) {
+
+            // If the inst is a conditional branch
+            if (INS_IsBranchOrCall(ins) && INS_HasFallThrough(ins)) {
                 INS_InsertPredicatedCall(ins, IPOINT_BEFORE,
                     (AFUNPTR)process_condbranch_wrap, IARG_INST_PTR,
                     IARG_BRANCH_TARGET_ADDR, IARG_BRANCH_TAKEN,
                     IARG_END);
             }
             else {
-                // if the instruction doesn't either read or write to memory
-                // nor is a conditional branch, it consumes one cycle and can
-                // be executed in parallel if it doesn't need a currently
-                // being used register
+                // if the instruction is not a conditional branch, it consumes
+                // one cycle and can be executed in parallel if it doesn't need
+                // a currently being used register
 
                 // check whether the instruction uses a register that's being
                 // written to by a memory operation
@@ -166,8 +168,7 @@ static VOID process_condbranch_wrap(VOID *ip, VOID *target, bool taken) {
     cpu->process_condbranch(ip, target, taken);
 }
 
-int main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]) {
 
     if (PIN_Init(argc, argv))
         return usage();
